@@ -21,7 +21,8 @@ let precedence formula = match formula with
 
 
 let rec render formula =
-  (* Helper function to wrap child in parens if needed *)
+  (* Helper function to wrap child in parens if needed (according to
+     rules of precedence) *)
   let render_child child =
     let repr = render child in
     if precedence formula < precedence child
@@ -43,7 +44,7 @@ let rec render formula =
 (** Helper function to simplify And / Or that have a list of operands.
     trivial refers to the value that can be removed from the list;
     cancel refers to the value that the expression will simplify to if present *)
-let simplify_list trivial cancel constructor operands =
+let simplify_op_list trivial cancel constructor operands =
   match List.filter ((<>) trivial) operands with
   | [] -> True
   | [only] -> only
@@ -51,10 +52,10 @@ let simplify_list trivial cancel constructor operands =
            then cancel
            else constructor ops
 
-(** Simplify a list-based operator when all the children have the same
+(** Simplify (unnest) a list-based operator when all the children have the same
    operator as the parent. It receives two functions as arguments to
    do so*)
-let simplify_nested_list check_type unnest operands =
+let unnest_op check_type unnest operands =
   if List.for_all check_type operands
   then List.concat (List.map unnest operands)
   else operands
@@ -71,7 +72,7 @@ let rec simplify formula =
   match formula with
   | And operands ->
      List.map simplify operands
-     |> simplify_nested_list
+     |> unnest_op
           (function
            | And _ -> true
            | _ -> false)
@@ -79,18 +80,18 @@ let rec simplify formula =
            | And y -> y
            | _ -> assert false)
      |> remove_duplicates
-     |> simplify_list True False (fun x -> And x)
+     |> simplify_op_list True False (fun x -> And x)
   | Or operands ->
-      List.map simplify operands
-      |> simplify_nested_list
-                    (function
-                     | Or _ -> true
-                     | _ -> false)
-                    (function
-                     | Or y -> y
-                     | _ -> assert false)
-      |> remove_duplicates
-      |> simplify_list False True (fun x -> Or x)
+     List.map simplify operands
+     |> unnest_op
+          (function
+           | Or _ -> true
+           | _ -> false)
+          (function
+           | Or y -> y
+           | _ -> assert false)
+     |> remove_duplicates
+     |> simplify_op_list False True (fun x -> Or x)
   | Iff (a, b) -> begin match simplify a, simplify b with
                   | False, a | a, False -> Not a
                   | True, a | a, True -> a
