@@ -11,4 +11,7 @@ type formula =
   | Atom of atom
 
 (** Obtain textual representation of a formula as a string *)
-val render_formula : formula -> string
+val render : formula -> string
+
+(** Simplify formula, removing true / false values and joining operators where necessary *)
+val simplify : formula -> formula
