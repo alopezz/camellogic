@@ -59,6 +59,13 @@ let simplify_nested_list check_type unnest operands =
   then List.concat (List.map unnest operands)
   else operands
 
+(** Remove duplicates from a list of operands *)
+let rec remove_duplicates operands =
+  match operands with
+  | [] -> []
+  | [only] -> [only]
+  | hd :: tl -> if List.mem hd tl then remove_duplicates tl
+                else hd :: remove_duplicates tl
 
 let rec simplify formula =
   match formula with
@@ -71,18 +78,19 @@ let rec simplify formula =
           (function
            | And y -> y
            | _ -> assert false)
+     |> remove_duplicates
      |> simplify_list True False (fun x -> And x)
-  | Or operands -> begin
+  | Or operands ->
       List.map simplify operands
-     |> simplify_nested_list
+      |> simplify_nested_list
                     (function
                      | Or _ -> true
                      | _ -> false)
                     (function
                      | Or y -> y
                      | _ -> assert false)
-     |> simplify_list False True (fun x -> Or x)
-    end
+      |> remove_duplicates
+      |> simplify_list False True (fun x -> Or x)
   | Iff (a, b) -> begin match simplify a, simplify b with
                   | False, a | a, False -> Not a
                   | True, a | a, True -> a

@@ -29,7 +29,10 @@ let simplify_testsuite =
         True;
       make_simplify_test
         (And [And [Atom "A"; Atom "B"]; And [Atom "C"; Atom "D"]])
-        (And [Atom "A"; Atom "B"; Atom "C"; Atom "D"])
+        (And [Atom "A"; Atom "B"; Atom "C"; Atom "D"]);
+      make_simplify_test
+        (And [Atom "A"; Atom "B"; Atom "B"; Atom "A"])
+        (And [Atom "B"; Atom "A"])
     ]
 
 let () =
