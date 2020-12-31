@@ -1,0 +1,8 @@
+opam-version: "2.0"
+name: "Camel Logic"
+version: "0.1"
+synopsis: "A library for manipulation of logic formulas"
+maintainer: "Alex Lopez <alex.lopez.zorzano@gmail.com>"
+authors: "Alex Lopez <alex.lopez.zorzano@gmail.com>"
+depends: [ "ocaml" "ocamlfind" "dune" "ounit2"]
+build: ["dune" "build" "-p" name "-j" jobs]
