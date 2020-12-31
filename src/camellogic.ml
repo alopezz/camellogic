@@ -51,11 +51,38 @@ let simplify_list trivial cancel constructor operands =
            then cancel
            else constructor ops
 
+(** Simplify a list-based operator when all the children have the same
+   operator as the parent. It receives two functions as arguments to
+   do so*)
+let simplify_nested_list check_type unnest operands =
+  if List.for_all check_type operands
+  then List.concat (List.map unnest operands)
+  else operands
+
 
 let rec simplify formula =
   match formula with
-  | And operands -> List.map simplify operands |> simplify_list True False (fun x -> And x)
-  | Or operands -> List.map simplify operands |> simplify_list False True (fun x -> Or x)
+  | And operands ->
+     List.map simplify operands
+     |> simplify_nested_list
+          (function
+           | And _ -> true
+           | _ -> false)
+          (function
+           | And y -> y
+           | _ -> assert false)
+     |> simplify_list True False (fun x -> And x)
+  | Or operands -> begin
+      List.map simplify operands
+     |> simplify_nested_list
+                    (function
+                     | Or _ -> true
+                     | _ -> false)
+                    (function
+                     | Or y -> y
+                     | _ -> assert false)
+     |> simplify_list False True (fun x -> Or x)
+    end
   | Iff (a, b) -> begin match simplify a, simplify b with
                   | False, a | a, False -> Not a
                   | True, a | a, True -> a

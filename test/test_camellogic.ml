@@ -27,6 +27,9 @@ let simplify_testsuite =
       make_simplify_test
         (Implies(And [Atom "P"; False], Or [Atom "P"; Not (Atom "Q")]))
         True;
+      make_simplify_test
+        (And [And [Atom "A"; Atom "B"]; And [Atom "C"; Atom "D"]])
+        (And [Atom "A"; Atom "B"; Atom "C"; Atom "D"])
     ]
 
 let () =
