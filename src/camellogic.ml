@@ -11,35 +11,37 @@ type formula =
   | Atom of atom
 
 
-let precedence formula = match formula with
-  | And _ -> 2
-  | Or _ -> 3
-  | Not _ -> 1
-  | Implies (_, _) -> 4
-  | Iff (_, _) -> 5
-  | True | False | Atom _ -> 0
+module Renderer = Pretty.MakeRenderer(
+                      struct
+                        type t = formula
+                        let arity = function
+                          | And ops | Or ops  -> Pretty.Variadic ops
+                          | Not op -> Pretty.Unary op
+                          | Implies (a, b) | Iff (a, b) -> Pretty.Binary (a, b)
+                          | Atom _ | True | False -> None
 
+                        let precedence = function
+                          | And _ -> 2
+                          | Or _ -> 3
+                          | Not _ -> 1
+                          | Implies (_, _) -> 4
+                          | Iff (_, _) -> 5
+                          | True | False | Atom _ -> 0
 
-let rec render formula =
-  (* Helper function to wrap child in parens if needed (according to
-     rules of precedence) *)
-  let render_child child =
-    let repr = render child in
-    if precedence formula < precedence child
-    then Printf.sprintf "(%s)" repr
-    else repr
-  in
-  match formula with
-  | And operands ->
-     String.concat " ∧ " (List.map render_child operands)
-  | Or operands ->
-     String.concat " ∨ " (List.map render_child operands)
-  | Not operand -> "¬" ^ (render_child operand)
-  | Implies (a, b) -> String.concat " → " (List.map render_child [a; b])
-  | Iff (a, b) -> String.concat " ⬌ " (List.map render_child [a; b])
-  | True -> "⊤"
-  | False -> "⊥"
-  | Atom a -> a
+                        let symbol = function
+                          | And _ -> "∧"
+                          | Or _ -> "∨"
+                          | Not _ -> "¬"
+                          | Implies (_, _) -> "→"
+                          | Iff (_, _) -> "⬌"
+                          | True -> "⊤"
+                          | False -> "⊥"
+                          | Atom a -> a
+
+                      end)
+
+let render = Renderer.render
+
 
 (** Helper function to simplify And / Or that have a list of operands.
     trivial refers to the value that can be removed from the list;
