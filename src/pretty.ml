@@ -19,7 +19,7 @@ end
 
 let spaced sym = Printf.sprintf " %s " sym
 
-module MakeRenderer (M : Representable) : PrettyRenderer with type t := M.t = struct
+module MakeRenderer (M : Representable) : (PrettyRenderer with type t := M.t) = struct
   let rec render formula =
     (* Helper function to wrap child in parens if needed (according to
      rules of precedence) *)

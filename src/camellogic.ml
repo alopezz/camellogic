@@ -37,7 +37,6 @@ module Renderer = Pretty.MakeRenderer(
                           | True -> "⊤"
                           | False -> "⊥"
                           | Atom a -> a
-
                       end)
 
 let render = Renderer.render
