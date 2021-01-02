@@ -18,7 +18,7 @@ module Renderer = Pretty.MakeRenderer(
                           | And ops | Or ops  -> Pretty.Variadic ops
                           | Not op -> Pretty.Unary op
                           | Implies (a, b) | Iff (a, b) -> Pretty.Binary (a, b)
-                          | Atom _ | True | False -> None
+                          | Atom _ | True | False -> Pretty.None
 
                         let precedence = function
                           | And _ -> 2
