@@ -38,7 +38,10 @@ let simplify_testsuite =
         False;
       make_simplify_test
         (Or [Atom "A"; Not False])
-        True
+        True;
+      make_simplify_test
+        (Not (Not (Atom "A")))
+        (Atom "A")
     ]
 
 let () =

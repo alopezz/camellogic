@@ -107,5 +107,6 @@ let rec simplify formula =
                       end
   | Not True -> False
   | Not False -> True
+  | Not (Not a) -> simplify a
   | Not a -> Not (simplify a)
   | True | False | Atom _ as v -> v
