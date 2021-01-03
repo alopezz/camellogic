@@ -99,6 +99,7 @@ let rec simplify formula =
   | Iff (a, b) -> begin match simplify a, simplify b with
                   | False, a | a, False -> Not a
                   | True, a | a, True -> a
+                  | a, b when a = b -> True
                   | a, b -> Iff (a, b)
                   end
   | Implies (a, b) -> begin match simplify a, simplify b with
@@ -106,6 +107,7 @@ let rec simplify formula =
                       | False, _ -> True
                       | True, b -> b
                       | a, False -> Not a
+                      | a, b when a = b -> True
                       | a, b -> Implies (a, b)
                       end
   | Not True -> False
