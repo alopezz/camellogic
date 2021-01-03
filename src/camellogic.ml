@@ -53,13 +53,11 @@ let simplify_op_list trivial cancel constructor operands =
            then cancel
            else constructor ops
 
-(** Simplify (unnest) a list-based operator when all the children have the same
-   operator as the parent. It receives two functions as arguments to
-   do so*)
-let unnest_op check_type unnest operands =
-  if List.for_all check_type operands
-  then List.concat (List.map unnest operands)
-  else operands
+(** Simplify (unnest) a list-based operator when it is within an
+   operator of the same type by applying the function [unnest] passed
+   as arguments *)
+let unnest_op unnest operands =
+  List.concat (List.map unnest operands)
 
 (** Remove duplicates from a list of operands *)
 let rec remove_duplicates operands =
@@ -84,9 +82,6 @@ let rec simplify formula =
      List.map simplify operands
      |> unnest_op
           (function
-           | Or _ -> false
-           | _ -> true)
-          (function
            | And y -> y
            | y -> [y])
      |> remove_duplicates
@@ -95,9 +90,6 @@ let rec simplify formula =
   | Or operands ->
      List.map simplify operands
      |> unnest_op
-          (function
-           | And _ -> false
-           | _ -> true)
           (function
            | Or y -> y
            | y -> [y])
