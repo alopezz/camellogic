@@ -32,7 +32,13 @@ let simplify_testsuite =
         (And [Atom "A"; Atom "B"; Atom "C"; Atom "D"]);
       make_simplify_test
         (And [Atom "A"; Atom "B"; Atom "B"; Atom "A"])
-        (And [Atom "B"; Atom "A"])
+        (And [Atom "B"; Atom "A"]);
+      make_simplify_test
+        (Not True)
+        False;
+      make_simplify_test
+        (Or [Atom "A"; Not False])
+        True
     ]
 
 let () =

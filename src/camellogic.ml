@@ -105,5 +105,7 @@ let rec simplify formula =
                       | a, False -> Not a
                       | a, b -> Implies (a, b)
                       end
+  | Not True -> False
+  | Not False -> True
   | Not a -> Not (simplify a)
   | True | False | Atom _ as v -> v
