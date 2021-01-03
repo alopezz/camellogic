@@ -45,7 +45,13 @@ let simplify_testsuite =
         True;
       make_simplify_test
         (Not (Not (Atom "A")))
-        (Atom "A")
+        (Atom "A");
+      make_simplify_test
+        (And [Atom "A"; Atom "B"; Not (Atom "A")])
+        False;
+      make_simplify_test
+        (Or [Atom "A"; Atom "B"; Not (Atom "A")])
+        True;
     ]
 
 let nnf_testsuite =

@@ -69,6 +69,18 @@ let rec remove_duplicates operands =
   | hd :: tl -> if List.mem hd tl then remove_duplicates tl
                 else hd :: remove_duplicates tl
 
+(** Simplify operands that appear negated within the same And or Or.
+[result] is the value that it should simplify to *)
+let rec simplify_negated_duplicates result operands =
+  match operands with
+  | [] -> []
+  | [only] -> [only]
+  | (Not hd) :: tl -> if List.mem hd tl then [result]
+                else hd :: simplify_negated_duplicates result tl
+  | hd :: tl -> if List.mem (Not hd) tl then [result]
+                else hd :: simplify_negated_duplicates result tl
+
+
 let rec simplify formula =
   match formula with
   | And operands ->
@@ -81,6 +93,7 @@ let rec simplify formula =
            | And y -> y
            | _ -> assert false)
      |> remove_duplicates
+     |> simplify_negated_duplicates False
      |> simplify_op_list True False (fun x -> And x)
   | Or operands ->
      List.map simplify operands
@@ -92,6 +105,7 @@ let rec simplify formula =
            | Or y -> y
            | _ -> assert false)
      |> remove_duplicates
+     |> simplify_negated_duplicates True
      |> simplify_op_list False True (fun x -> Or x)
   | Iff (a, b) -> begin match simplify a, simplify b with
                   | False, a | a, False -> Not a
@@ -113,7 +127,7 @@ let rec simplify formula =
 
 
 let negate_operands operands =
-  List.map (fun op -> simplify (Not op)) operands
+  List.map (fun op -> (Not op)) operands
 
 
 let rec nnf_of_formula formula =
