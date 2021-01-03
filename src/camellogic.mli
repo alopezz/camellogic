@@ -19,3 +19,7 @@ val simplify : formula -> formula
 
 (** Convert formula to Negation normal form (NNF) *)
 val nnf_of_formula : formula -> formula
+
+val dnf_of_formula : formula -> formula
+
+val cnf_of_formula : formula -> formula

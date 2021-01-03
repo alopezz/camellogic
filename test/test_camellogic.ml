@@ -14,6 +14,14 @@ let make_nnf_test formula expected =
   "Convert " ^ (render formula) ^ " to NNF" >::
     fun _ -> assert_equal (nnf_of_formula formula) expected
 
+let make_dnf_test formula expected =
+  "Convert " ^ (render formula) ^ " to DNF" >::
+    fun _ -> assert_equal (dnf_of_formula formula) expected
+
+let make_cnf_test formula expected =
+  "Convert " ^ (render formula) ^ " to CNF" >::
+    fun _ -> assert_equal (cnf_of_formula formula) expected
+
 let render_testsuite =
   "Test rendering">:::
     [
@@ -54,14 +62,25 @@ let simplify_testsuite =
         True;
     ]
 
-let nnf_testsuite =
-  "Test conversion to NNF ">:::
+let normal_form_testsuite =
+  "Test conversion to normal forms">:::
     [
       make_nnf_test
         (Not (And [Atom "A"; Not (Atom "B")]))
-        (Or [Not (Atom "A"); Atom "B"])
+        (Or [Not (Atom "A"); Atom "B"]);
+      make_dnf_test
+        (And [Or [Atom "F1"; Atom "F2"]; Atom "F3"])
+        (Or [And [Atom "F1"; Atom "F3"]; And [Atom "F2"; Atom "F3"]]);
+      make_cnf_test
+        (Or [And [Atom "F1"; Atom "F2"]; Atom "F3"])
+        (And [Or [Atom "F1"; Atom "F3"]; Or [Atom "F2"; Atom "F3"]]);
+      make_cnf_test
+        (Or [And [Atom "Q1"; Not (Not (Atom "Q2"))]; (Implies (Not (Atom "R1"), Atom "R2"))])
+        (And [Or [Atom "Q1"; Atom "R1"; Atom "R2"]; Or [Atom "Q2"; Atom "R1"; Atom "R2"]])
     ]
+
 
 let () =
   run_test_tt_main render_testsuite;
   run_test_tt_main simplify_testsuite;
+  run_test_tt_main normal_form_testsuite;

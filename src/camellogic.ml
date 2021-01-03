@@ -65,7 +65,6 @@ let unnest_op check_type unnest operands =
 let rec remove_duplicates operands =
   match operands with
   | [] -> []
-  | [only] -> [only]
   | hd :: tl -> if List.mem hd tl then remove_duplicates tl
                 else hd :: remove_duplicates tl
 
@@ -74,12 +73,10 @@ let rec remove_duplicates operands =
 let rec simplify_negated_duplicates result operands =
   match operands with
   | [] -> []
-  | [only] -> [only]
   | (Not hd) :: tl -> if List.mem hd tl then [result]
-                else hd :: simplify_negated_duplicates result tl
+                else (Not hd) :: simplify_negated_duplicates result tl
   | hd :: tl -> if List.mem (Not hd) tl then [result]
                 else hd :: simplify_negated_duplicates result tl
-
 
 let rec simplify formula =
   match formula with
@@ -87,11 +84,11 @@ let rec simplify formula =
      List.map simplify operands
      |> unnest_op
           (function
-           | And _ -> true
-           | _ -> false)
+           | Or _ -> false
+           | _ -> true)
           (function
            | And y -> y
-           | _ -> assert false)
+           | y -> [y])
      |> remove_duplicates
      |> simplify_negated_duplicates False
      |> simplify_op_list True False (fun x -> And x)
@@ -99,11 +96,11 @@ let rec simplify formula =
      List.map simplify operands
      |> unnest_op
           (function
-           | Or _ -> true
-           | _ -> false)
+           | And _ -> false
+           | _ -> true)
           (function
            | Or y -> y
-           | _ -> assert false)
+           | y -> [y])
      |> remove_duplicates
      |> simplify_negated_duplicates True
      |> simplify_op_list False True (fun x -> Or x)
@@ -133,9 +130,44 @@ let negate_operands operands =
 let rec nnf_of_formula formula =
   simplify
     (match formula with
+     | And ops -> And (List.map nnf_of_formula ops)
+     | Or ops -> Or (List.map nnf_of_formula ops)
      | Not (And ops) -> Or (negate_operands ops |> List.map nnf_of_formula)
      | Not (Or ops) -> And (negate_operands ops |> List.map nnf_of_formula)
      | Implies (a, b) -> Or ([Not a; b] |> List.map nnf_of_formula)
      | Iff (a, b) -> let a, b = nnf_of_formula a, nnf_of_formula b in
                      And [Implies (a, b); Implies(a, b)]
-     | f -> f)
+     | True | False | Not _ | Atom _ as v -> v)
+
+
+let rec distribute_conjunctions formula =
+  match formula with
+  | And operands -> begin
+      match operands with
+      | (Or ops_or) :: b :: tl -> distribute_conjunctions (And (Or (List.map (fun x -> And [x; b]) ops_or) :: tl))
+      | a :: (Or ops_or) :: tl -> distribute_conjunctions (And (Or (List.map (fun x -> And [a; x]) ops_or) :: tl))
+      | [] -> And []
+      | lst -> And lst
+    end
+  | f -> f
+
+let dnf_of_formula formula =
+  nnf_of_formula formula
+  |> distribute_conjunctions
+  |> simplify
+
+let rec distribute_disjunctions formula =
+  match formula with
+  | Or operands -> begin
+      match operands with
+      | (And ops_and) :: b :: tl -> distribute_disjunctions (Or (And (List.map (fun x -> Or [x; b]) ops_and) :: tl))
+      | a :: (And ops_and) :: tl -> distribute_disjunctions (Or (And (List.map (fun x -> Or [a; x]) ops_and) :: tl))
+      | [] -> And []
+      | lst -> And lst
+    end
+  | f -> f
+
+let cnf_of_formula formula =
+  nnf_of_formula formula
+  |> distribute_disjunctions
+  |> simplify
