@@ -10,6 +10,10 @@ let make_simplify_test formula expected =
   "Simplify " ^ (render formula) >::
     fun _ -> assert_equal (simplify formula) expected
 
+let make_nnf_test formula expected =
+  "Convert " ^ (render formula) ^ " to NNF" >::
+    fun _ -> assert_equal (nnf_of_formula formula) expected
+
 let render_testsuite =
   "Test rendering">:::
     [
@@ -42,6 +46,14 @@ let simplify_testsuite =
       make_simplify_test
         (Not (Not (Atom "A")))
         (Atom "A")
+    ]
+
+let nnf_testsuite =
+  "Test conversion to NNF ">:::
+    [
+      make_nnf_test
+        (Not (And [Atom "A"; Not (Atom "B")]))
+        (Or [Not (Atom "A"); Atom "B"])
     ]
 
 let () =

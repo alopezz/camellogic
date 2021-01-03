@@ -110,3 +110,18 @@ let rec simplify formula =
   | Not (Not a) -> simplify a
   | Not a -> Not (simplify a)
   | True | False | Atom _ as v -> v
+
+
+let negate_operands operands =
+  List.map (fun op -> simplify (Not op)) operands
+
+
+let rec nnf_of_formula formula =
+  simplify
+    (match formula with
+     | Not (And ops) -> Or (negate_operands ops |> List.map nnf_of_formula)
+     | Not (Or ops) -> And (negate_operands ops |> List.map nnf_of_formula)
+     | Implies (a, b) -> Or ([Not a; b] |> List.map nnf_of_formula)
+     | Iff (a, b) -> let a, b = nnf_of_formula a, nnf_of_formula b in
+                     And [Implies (a, b); Implies(a, b)]
+     | f -> f)
