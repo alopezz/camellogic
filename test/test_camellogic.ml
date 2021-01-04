@@ -5,22 +5,27 @@ open OUnit2
 let make_render_formula_test formula repr =
   "Render " ^ repr >::
     fun _ -> assert_equal (render formula) repr
+               ~printer: Fun.id
 
 let make_simplify_test formula expected =
   "Simplify " ^ (render formula) >::
     fun _ -> assert_equal (simplify formula) expected
+               ~printer: render
 
 let make_nnf_test formula expected =
   "Convert " ^ (render formula) ^ " to NNF" >::
     fun _ -> assert_equal (nnf_of_formula formula) expected
+               ~printer: render
 
 let make_dnf_test formula expected =
   "Convert " ^ (render formula) ^ " to DNF" >::
     fun _ -> assert_equal (dnf_of_formula formula) expected
+               ~printer:render
 
 let make_cnf_test formula expected =
   "Convert " ^ (render formula) ^ " to CNF" >::
     fun _ -> assert_equal (cnf_of_formula formula) expected
+               ~printer: render
 
 let render_testsuite =
   "Test rendering">:::
