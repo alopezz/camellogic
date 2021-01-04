@@ -1,16 +1,19 @@
-type variable = string
 
-type term =
-  | Sum of term list
-  | Sub of term list
-  | Constant of int
-  | Mul of int * term
-  | Var of variable
+module Types = struct
+  type variable = string
+  type term =
+    | Sum of term list
+    | Sub of term list
+    | Constant of int
+    | Mul of int * term
+    | Var of variable
+  type predicate =
+    | Equal of term * term
+    | GreaterThan of term * term
+end
 
-type predicate =
-  | Equal of term * term
-  | GreaterThan of term * term
-
+open Types
+  
 type t = predicate
 
 module TermRenderer = Pretty.MakeRenderer(
