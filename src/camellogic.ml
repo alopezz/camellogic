@@ -8,6 +8,6 @@ module Propositional = Logic.Make(struct
 let render = Propositional.render
 
 module IntLogic = struct
-  include Fol.IntTheoryLogic
+  include Logic.Make(Inttheory)
   module Types = Inttheory.Types
 end
