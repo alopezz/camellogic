@@ -1,6 +1,5 @@
 open Common
 
-
 module type PredicateM = sig
   type t
   val render : t -> string
@@ -11,13 +10,13 @@ module type Logic = sig
   val render : t -> string
 end
 
-module MakeLogic (M : PredicateM) : (Logic with type t := M.t formula) = struct
+module Make (M : PredicateM) : (Logic with type t := M.t formula) = struct
   module Renderer = Pretty.MakeRenderer(
                         struct
                           type t = M.t formula
                           open Common
                           let arity = function
-                            | And ops | Or ops  -> Pretty.Variadic ops
+                            | And ops | Or ops -> Pretty.Variadic ops
                             | Not op -> Pretty.Unary op
                             | Implies (a, b) | Iff (a, b) -> Pretty.Binary (a, b)
                             | Atom _ | True | False -> Pretty.None
