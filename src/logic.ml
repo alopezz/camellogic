@@ -3,6 +3,7 @@ open Common
 module type PredicateM = sig
   type t
   val render : t -> string
+  val precedence : int
 end
 
 module type Logic = sig
@@ -27,7 +28,8 @@ module Make (M : PredicateM) : (Logic with type t := M.t formula) = struct
                             | Not _ -> 1
                             | Implies (_, _) -> 4
                             | Iff (_, _) -> 5
-                            | True | False | Atom _ -> 0
+                            | True | False -> 0
+                            | Atom _ -> M.precedence
 
                           let symbol = function
                             | And _ -> "∧"

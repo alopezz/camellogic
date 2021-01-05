@@ -16,6 +16,8 @@ open Types
   
 type t = predicate
 
+let precedence = 2
+
 module TermRenderer = Pretty.MakeRenderer(
                                struct
                                  type t = term

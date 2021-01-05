@@ -14,3 +14,5 @@ end
 type t = Types.predicate
 
 val render : t -> string
+
+val precedence : int

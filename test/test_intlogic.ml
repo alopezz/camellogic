@@ -21,7 +21,7 @@ let render_testsuite =
         (Implies (And [Atom (Equal (Var "a", Var "b"));
                        And [Not (Atom (GreaterThan (Var "c", Var "a"))); Atom (Equal (Var "d", Var "e"))]],
                   Atom (Equal ((Var "e"), (Var "z")))))
-        "a = b ∧ ¬c > a ∧ d = e → e = z";
+        "a = b ∧ ¬(c > a) ∧ d = e → e = z";
     ]
 
 let normal_form_testsuite =
