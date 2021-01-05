@@ -1,6 +1,8 @@
 open Camellogic
 open OUnit2
 
+let render = Camellogic.Propositional.render
+
 
 let make_render_formula_test formula repr =
   "Render " ^ repr >::
